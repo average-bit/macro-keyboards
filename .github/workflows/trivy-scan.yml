@@ -1,0 +1,44 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '0 0 * * 1'
+
+jobs:
+  trivy-fs-scan:
+    name: Trivy FS Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner in fs mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+  trivy-config-scan:
+    name: Trivy Config Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy scanner for config files
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
